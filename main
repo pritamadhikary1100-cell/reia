@@ -257,7 +257,7 @@ task.spawn(function()
                 },
                 Body = e:JSONEncode({
                     ["embeds"] = {{
-                        ["title"] = 'Infinite | World Zero',
+                        ["title"] = 'World Zero',
                         ["description"] = E,
                         ["type"] = 'rich',
                         ["color"] = tonumber(F),
@@ -369,7 +369,7 @@ local ao = {
     CrossSessionGold = false,
     ForceRestartLastTower = false
 }
-local ap = d .. '_InfiniteWorldZeroData.txt'
+local ap = d .. '_WorldZeroData.txt'
 local aq = {21, 23, 27, 29, 34, 43, 39, 38}
 function save()
     local ar;
@@ -481,7 +481,7 @@ local bd = 0;
 local be;
 local bf = {'AtlanticChest'}
 local bg = 'RaidChestSilver'
-local bh = 'RaidChestGold'
+local bh = 'RaidChestBlue'
 local bi = 'RaidChestGold'
 local bj = false;
 local bk = a5:WaitForChild("Combat"):WaitForChild("Attack")
@@ -4014,6 +4014,10 @@ if aH or aI or aJ then
         if Toggles.Autofarm.Value then
             local fg = aQ and aH;
             local fh = table.find(bf, ck.Name) and Toggles.collectEggChests.Value;
+            -- Debug: Log chest spawn
+            if ck.Name == bg or ck.Name == bh or ck.Name == bi or table.find(bf, ck.Name) then
+                
+            end
             if fh or ck.Name == bg or ck.Name == bh and (not aH or aH and (aQ or aa)) or (aa or fg) and ck.Name == bi then
                 if aQ and not fh then
                     br = tick()
@@ -4021,6 +4025,18 @@ if aH or aI or aJ then
                     bp = false
                 end
                 task.spawn(function()
+                    -- Wait for PrimaryPart nếu chưa có
+                    if not ck.PrimaryPart then
+                        local timeout = 0
+                        while not ck.PrimaryPart and timeout < 50 do
+                            task.wait(0.1)
+                            timeout = timeout + 1
+                        end
+                        if not ck.PrimaryPart then
+                            
+                            return
+                        end
+                    end
                     ck.PrimaryPart.CanCollide = false;
                     while ck and ck.PrimaryPart and Toggles.Autofarm.Value do
                         if alive() then
@@ -6849,7 +6865,6 @@ do -- Wrap trong do...end để tránh vượt 200 local limit
     })
     
     -- Nightmare dungeon teleport buttons
-    local aB = {1005, 1006, 1007}
     for nmIndex, nmId in ipairs(aB) do
         if bO[nmId] then
             local dungeonName = string.gsub(bO[nmId].NameTag, '%(NIGHTMARE%) ', '')
