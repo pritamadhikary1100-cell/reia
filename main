@@ -6,7 +6,7 @@ end
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
---==================Các Biến===================
+--==================Các Biến===================x
 local a;
 local b = game:GetService('Players')
 local c = b.LocalPlayer or b:GetPropertyChangedSignal('LocalPlayer'):Wait() or b.LocalPlayer;
@@ -3412,7 +3412,9 @@ do
                 if aM or aQ then
                     break
                 end
-                if alive() then
+                -- ✅ Cho phép scan checkpoint ngay cả khi có mob ở DireProblem (2) và VolcanosShadow (13)
+                local allowScanWithMobs = (ay == 2 or ay == 13)
+                if alive() and (bd == 0 or allowScanWithMobs) then
                     for dj, A in workspace:GetChildren() do
                         if not table.find(c8, A.Name) then
                             for z, R in A:GetDescendants() do
@@ -3421,7 +3423,7 @@ do
                                         table.find(c7, R.Parent.Parent.Name)) then
                                     if R.Parent.Name == 'WaveExit' then
                                         PlayerTp(R.Parent.Position, 0, 5, 0)
-                                        task.wait(1)
+                                        task.wait(1)  -- ✅ Giống old.lua - QUAN TRỌNG!
                                     else
                                         task.spawn(function()
                                             R.Parent.CanCollide = false;
@@ -3429,7 +3431,7 @@ do
                                             R.Parent.Transparency = 1;
                                             local eg = R.Parent.CFrame;
                                             R.Parent.CFrame = CFrame.new(aU.Position)
-                                            task.wait(1)
+                                            task.wait(0.25)  -- ✅ Giống old.lua
                                             if R and R.Parent then
                                                 R.Parent.CFrame = eg
                                             end
@@ -3441,10 +3443,10 @@ do
                     end
                     local eh = tick()
                     while Toggles.Autofarm.Value do
-                        if tick() - eh > 3 then
+                        if tick() - eh > 3 then  -- ✅ Giống old.lua
                             break
                         end
-                        if tick() - eh > 1 and bd == 0 then
+                        if tick() - eh > 0.5 and bd == 0 then  -- ✅ Giống old.lua
                             local ei = true;
                             if aH then
                                 local dw = tick()
@@ -3456,17 +3458,17 @@ do
                                     if tick() - dw > 1 then
                                         break
                                     end
-                                    task.wait()
+                                    task.wait()  -- ✅ Giống old.lua CHÍNH XÁC
                                 end
                             end
                             if ei then
                                 break
                             end
                         end
-                        task.wait()
+                        task.wait()  -- ✅ Giống old.lua CHÍNH XÁC
                     end
                 end
-                task.wait()
+                task.wait()  -- ✅ Giống old.lua CHÍNH XÁC
             end
         end)
     end
@@ -3482,7 +3484,7 @@ do
                 if bd ~= be then
                     bd = be
                 end
-                task.wait()
+                task.wait()  -- ✅ Giống old.lua CHÍNH XÁC
             end
         end)
     end
@@ -4170,13 +4172,17 @@ task.spawn(function()
             R:Destroy()
         end
         workspace.Assets_FX.ChildAdded:Connect(function(ck)
-            ck:Destroy()
+            -- ✅ Tắt effect khi Killaura hoặc Autofarm bật
+            if Toggles.Killaura.Value or Toggles.Autofarm.Value then
+                ck:Destroy()
+            end
         end)
     end
     local cj = require(game.ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Effects"))
     local fM = cj.DoEffect;
     cj.DoEffect = function(self, ...)
-        if Toggles.disableEffects.Value then
+        -- ✅ Tắt effect khi killaura hoặc autofarm hoặc disableEffects được bật
+        if Toggles.disableEffects.Value or Toggles.Killaura.Value or Toggles.Autofarm.Value then
             return
         end
         local fN = {...}
@@ -4193,10 +4199,35 @@ local gH = cj.RenderDamageNumber
 
 -- Hook RenderDamageNumber để ẩn số sát thương
 cj.RenderDamageNumber = function(...)
-    if Toggles.NVD.Value then
+    if Toggles.NVD.Value or Toggles.Killaura.Value or Toggles.Autofarm.Value then
         return
     end
     return gH(...)
+end
+
+-- ✅ Hook tất cả effect functions để tắt khi farm
+local gH2 = cj.DoLinkedEffect;
+cj.DoLinkedEffect = function(self, ...)
+    if Toggles.disableEffects.Value or Toggles.Killaura.Value or Toggles.Autofarm.Value then
+        return
+    end
+    return gH2(self, ...)
+end
+
+local gH3 = cj.SpawnAt;
+cj.SpawnAt = function(self, ...)
+    if Toggles.disableEffects.Value or Toggles.Killaura.Value or Toggles.Autofarm.Value then
+        return
+    end
+    return gH3(self, ...)
+end
+
+local gH4 = cj.EmitAt;
+cj.EmitAt = function(self, ...)
+    if Toggles.disableEffects.Value or Toggles.Killaura.Value or Toggles.Autofarm.Value then
+        return
+    end
+    return gH4(self, ...)
 end
 -- ============== FAST SPRINT HOOK ============== (← THÊM PHẦN NÀY)
 task.spawn(function()
@@ -4995,7 +5026,7 @@ local AutofarmToggle = Tab1:Toggle({
                         end
                     end
                 end
-                task.wait(0.5)  -- Check mỗi 0.5 giây để dùng skill nhanh hơn
+                task.wait(1)  -- Check mỗi 0.5 giây để dùng skill nhanh hơn
             end
         end)
         -- ============== END AUTO SKILL USAGE ==============        
