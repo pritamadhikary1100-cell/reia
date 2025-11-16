@@ -6,7 +6,7 @@ end
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
---==================Các Biến===================
+--==================Các Biến===d================
 local a;
 local b = game:GetService('Players')
 local c = b.LocalPlayer or b:GetPropertyChangedSignal('LocalPlayer'):Wait() or b.LocalPlayer;
@@ -726,8 +726,9 @@ end)
 
 load()
 if not aC then
-    if ao.Kicked and ao.WasInDungeon or ao.RejoinLastDungeon and tick() - ao.Timestamp <= ao.RejoinLastDungeonThreshold and
-        ao.CameFromMenu or ao.WasInDungeon and ao.Dungeon and table.find(aA, ao.Dungeon) and ao.ForceRestartLastTower then
+    if (ao.Kicked and ao.WasInDungeon) or 
+       (ao.RejoinLastDungeon and ao.Timestamp and type(ao.Timestamp) == "number" and (tick() - ao.Timestamp) <= ao.RejoinLastDungeonThreshold and ao.CameFromMenu) or 
+       (ao.WasInDungeon and ao.Dungeon and table.find(aA, ao.Dungeon) and ao.ForceRestartLastTower) then
         ao.CameFromMenu = false;
         save()
         if ao.Dungeon then
