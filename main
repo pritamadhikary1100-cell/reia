@@ -1,8 +1,8 @@
---kiểm tra xem có phải là game world zero không, = 0 dừng script 
+
 if game.gameId ~= 985731078 then
     return
 end
---đợi game tải xong trước khi chạy script
+
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
@@ -882,7 +882,7 @@ local ca = {
         Id = 26,
         ignoreMob = 'HadesCesrberus',
         mobWaitTbl = {'HadesCerberus', 'Hades'},
-        mobWaitTime = 5,
+        mobWaitTime = 10,
         alwaysWait = true
     },
     VaneEvent = {
