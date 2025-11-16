@@ -6,7 +6,7 @@ end
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
---==================Các Biến===================x
+--==================Các Biến===================
 local a;
 local b = game:GetService('Players')
 local c = b.LocalPlayer or b:GetPropertyChangedSignal('LocalPlayer'):Wait() or b.LocalPlayer;
@@ -6174,6 +6174,13 @@ local AutoSellTiersDropdown = Section2Tab1:Dropdown({
     end
 })
 ConfigSystem.registerUIElement("AutoSellTbl", AutoSellTiersDropdown)
+
+-- Hook vào SetValue để tự động cập nhật UI khi config load
+local originalSetValue = Options.AutoSellTbl.SetValue
+Options.AutoSellTbl.SetValue = function(self, newValue)
+    originalSetValue(self, newValue)
+    updateAutoSellStatus()
+end
 
 -- Khởi tạo trạng thái ban đầu
 updateAutoSellStatus()
