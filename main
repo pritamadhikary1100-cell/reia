@@ -6,7 +6,7 @@ end
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
---==================Các Biến===d================
+--==================Các Biến===d=============x==
 local a;
 local b = game:GetService('Players')
 local c = b.LocalPlayer or b:GetPropertyChangedSignal('LocalPlayer'):Wait() or b.LocalPlayer;
@@ -3414,7 +3414,7 @@ do
                     break
                 end
                 -- ✅ Cho phép scan checkpoint ngay cả khi có mob ở DireProblem (2) và VolcanosShadow (13)
-                local allowScanWithMobs = (ay == 2 or ay == 13)
+                local allowScanWithMobs = (ay == 2 or ay == 13 or ay == 30)
                 if alive() and (bd == 0 or allowScanWithMobs) then
                     for dj, A in workspace:GetChildren() do
                         if not table.find(c8, A.Name) then
