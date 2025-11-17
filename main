@@ -6,7 +6,7 @@ end
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
---==================Các Biến===d=============x==
+--==================Các Biến===================
 local a;
 local b = game:GetService('Players')
 local c = b.LocalPlayer or b:GetPropertyChangedSignal('LocalPlayer'):Wait() or b.LocalPlayer;
@@ -43,6 +43,7 @@ local ToggleStates = {
     AutoAcceptInvite = false,  
     AutoPartyMonitor = false,
     AutoInviteAll = false,
+    smartDungeonRejoin = false,
     AutoRejoin = false,
     -- Auto Hatch toggles
     AutoBuyEgg = false,
@@ -50,6 +51,42 @@ local ToggleStates = {
     SmartPetKeep = false,
     AutoSellPetByTier = false,
     AutoSellAllPets = false,
+    -- Keep Perk toggles (cho Smart Perk Sell)
+    keepVampiric = false,
+    keepLifeDrain = false,
+    keepOblivion = false,
+    keepAgility = false,
+    keepAttackUp = false,
+    keepBonusHealthRegen = false,
+    keepBossSlayer = false,
+    keepBurnChance = false,
+    keepCriticalStack = false,
+    keepDamageReduction = false,
+    keepElementalResistance = false,
+    keepEliteAssassin = false,
+    keepEnergized = false,
+    keepFerocious = false,
+    keepFortress = false,
+    keepGlass = false,
+    keepGoldHoarder = false,
+    keepHPUp = false,
+    keepLuckyLooter = false,
+    keepMasterThief = false,
+    keepMobSlayer = false,
+    keepOpeningStrike = false,
+    keepPoisonousThorns = false,
+    keepResistBurn = false,
+    keepResistFrost = false,
+    keepResistKnockdown = false,
+    keepResistPoison = false,
+    keepRoughSkin = false,
+    keepSelfDestruct = false,
+    keepShiftedAggro = false,
+    keepUntouchable = false,
+    keepBonusAttack = false,
+    keepBonusHP = false,
+    keepBonusWalkspeed = false,
+    keepElemental = false,
 }
 
 local OptionValues = {
@@ -897,7 +934,7 @@ local ca = {
     FALLENKING_KILLS = {
         Id = 22,
         priorityTbl = {'FallenKingMinion', 'BOSSFallenKing', 'FallenQueenGuard', 'BOSSFallenPrince', 'BOSSFallenQueen'},
-        mobWaitTbl = {'FallenKingMinion'}, -- ✅ Đợi minion spawn
+        mobWaitTbl = {'FallenKingMinion'},
         mobWaitTime = 1
     },
     KrakenEvent = {
@@ -930,6 +967,72 @@ local ca = {
         priorityTbl = {'Model', 'BOSSHogRider'}
     }
 }
+
+-- Bảng thời gian restart cho Smart Dungeon Rejoin
+local dungeonRestartTimes = {
+    [1] = {normal = 30, challenge = 35, nightmare = 0},  -- CrabbyCrusade
+    [2] = {normal = 39, challenge = 41, nightmare = 0},  -- DireProblem
+    [3] = {normal = 25, challenge = 28, nightmare = 0},  -- ScarecrowDefense
+    [4] = {normal = 44, challenge = 46, nightmare = 0},  -- KingSlayer
+    [6] = {normal = 52, challenge = 64, nightmare = 0},  -- GravetowerDungeon
+    [7] = {normal = 40, challenge = 300, nightmare = 0}, -- VolcanoDungeon
+    [11] = {normal = 53, challenge = 55, nightmare = 0}, -- TempleOfRuin
+    [12] = {normal = 45, challenge = 52, nightmare = 0}, -- MamaTrauma
+    [13] = {normal = 60, challenge = 125, nightmare = 0}, -- VolcanosShadow
+    [14] = {normal = 35, challenge = 51, nightmare = 0}, -- MountainPass
+    [15] = {normal = 30, challenge = 165, nightmare = 0}, -- WinterCavern
+    [16] = {normal = 71, challenge = 90, nightmare = 0}, -- WinterDungeon
+    [18] = {normal = 80, challenge = 135, nightmare = 0}, -- PyramidDungeon
+    [19] = {normal = 40, challenge = 75, nightmare = 0}, -- DesertedBurrowmine
+    [20] = {normal = 65, challenge = 120, nightmare = 0}, -- ScrapCanyon
+    [21] = {normal = 344, challenge = 0, nightmare = 0}, -- PrisonTower
+    [23] = {normal = 390, challenge = 0, nightmare = 0}, -- AtlantisTower
+    [24] = {normal = 46, challenge = 56, nightmare = 0}, -- KonoHeartlands
+    [25] = {normal = 82, challenge = 97, nightmare = 0}, -- RoughWaters
+    [26] = {normal = 143, challenge = 175, nightmare = 0}, -- TheUnderworld
+    [27] = {normal = 321, challenge = 0, nightmare = 0}, -- MezuvianTower
+    [29] = {normal = 343, challenge = 0, nightmare = 0}, -- OasisTower
+    [30] = {normal = 135, challenge = 141, nightmare = 0}, -- RescueInTheRuins
+    [31] = {normal = 100, challenge = 125, nightmare = 0}, -- RuinRush
+    [32] = {normal = 144, challenge = 162, nightmare = 0}, -- TreetopTrouble
+    [33] = {normal = 106, challenge = 126, nightmare = 0}, -- AetherFortress
+    [34] = {normal = 318, challenge = 0, nightmare = 0}, -- AetherTower
+    [35] = {normal = 72, challenge = 88, nightmare = 0}, -- KonohInferno
+    [36] = {normal = 90, challenge = 125, nightmare = 0}, -- TreasureHunt
+    [37] = {normal = 75, challenge = 86, nightmare = 0}, -- TheLabyrinth
+    [41] = {normal = 165, challenge = 190, nightmare = 0}, -- CrystalChaos
+    [42] = {normal = 185, challenge = 196, nightmare = 0}, -- AstralAcademy
+    [43] = {normal = 421, challenge = 0, nightmare = 0}, -- ArcaneTower
+}
+
+-- Hàm lấy thời gian restart thông minh
+local function getSmartRestartTime(dungeonId, difficulty)
+    -- Nếu toggle tắt, dùng slider
+    if not Toggles.smartDungeonRejoin.Value then
+        return Options.dungeonRestartTimer.Value
+    end
+    
+    -- Kiểm tra nếu là nightmare dungeon (1005, 1006, 1007 với difficulty 5)
+    local isNightmare = table.find(aB, dungeonId) and difficulty == 5
+    
+    -- Tìm config dungeon trong bảng dungeonRestartTimes
+    local times = dungeonRestartTimes[dungeonId]
+    if times then
+        local diffKey
+        if isNightmare then
+            diffKey = "nightmare"
+        elseif difficulty == 5 then
+            diffKey = "challenge"
+        else
+            diffKey = "normal"
+        end
+        return times[diffKey] or Options.dungeonRestartTimer.Value
+    end
+    
+    -- Fallback về slider nếu không tìm thấy
+    return Options.dungeonRestartTimer.Value
+end
+
 local cb = 15;
 local cc = {
     World1 = {
@@ -3168,6 +3271,7 @@ do
             while Toggles.Autofarm.Value do
                 for z, R in bl:GetChildren() do
                     if isAlive(R) then
+                        
                         if mobWaitTbl and table.find(mobWaitTbl, R.Name) and (not e8 or alwaysWait) then
                             task.wait(waittime)
                             e8 = true
@@ -3908,19 +4012,27 @@ if aC then
                     for dj, f3 in ck:GetChildren() do
                         -- Chỉ xử lý nếu là StringValue có PerkValue (tức là Perk1/2/3)
                         if f3:IsA("StringValue") and f3:FindFirstChild("PerkValue") and Options[f3.Value] then
+                            local perkName = f3.Value
                             local f4 = math.round(f3.PerkValue.Value * 100)
-                            local f5 = Options[f3.Value].Value;
-                            local minValue = math.round(bQ[f3.Value].StatRange[1] * 100)
-                            local f6 = f5 >= minValue  -- ✅ SỬA: >= thay vì >
-                            local f7 = bQ[f3.Value].DisplayName;
+                            local f5 = Options[perkName].Value;
+                            local minValue = math.round(bQ[perkName].StatRange[1] * 100)
+                            local f6 = f5 >= minValue
+                            local f7 = bQ[perkName].DisplayName;
                             local f8 = f6 and f4 >= f5;
-                            local f9 = f6 and f4 == math.round(bQ[f3.Value].StatRange[2] * 100)
-                            if f8 and not f0 then
+                            local f9 = f6 and f4 == math.round(bQ[perkName].StatRange[2] * 100)
+                            
+                            -- ✅ THÊM: Kiểm tra toggle keep perk
+                            local keepToggleName = "keep" .. perkName
+                            local shouldCheckPerk = Toggles[keepToggleName] and Toggles[keepToggleName].Value
+                            
+                            -- Nếu toggle perk BẬT và đạt ngưỡng → giữ weapon
+                            if shouldCheckPerk and f8 and not f0 then
                                 f0 = true
                             end
-                            if f9 and not f1 then
+                            if shouldCheckPerk and f9 and not f1 then
                                 f1 = true
                             end
+                            
                             f2 = f2 .. '\n' ..
                                     (f9 and '### <:Gold:832693611396857886> ' or f8 and '### :green_circle: ' or
                                         '### :red_circle: ') .. f7 .. ': ``' .. f4 .. '%``'
@@ -3976,7 +4088,21 @@ if aC then
         pcallWithError(function()
             openEndChests()
         end)
-        task.wait(eW and 2 or 3 + Options.dungeonRestartTimer.Value)
+        local smartWaitTime = getSmartRestartTime(ay, az)
+        local baseWait = eW and 2 or 3
+        local totalWait = baseWait + smartWaitTime
+        local startWaitTime = tick()
+        
+        -- Countdown cho restart
+        while tick() - startWaitTime < totalWait and Toggles.Autofarm.Value do
+            local remaining = math.round(totalWait - (tick() - startWaitTime))
+            if remaining > 0 then
+                setRestartObjective('Restarting Mission in ' .. remaining .. 's')
+            end
+            task.wait(0.5)
+        end
+        resetRestartObjective()
+        
         missionEndRestartOrNextEvent()
     end)
     local fd = a5.Towers:WaitForChild('TowerFinished')
@@ -4005,7 +4131,19 @@ if aC then
                 end
                 task.wait()
             end
-            task.wait(Options.towerRestartTimer.Value)
+            
+            -- Countdown cho tower restart
+            local towerWaitTime = Options.towerRestartTimer.Value
+            local startWaitTime = tick()
+            while tick() - startWaitTime < towerWaitTime and Toggles.Autofarm.Value do
+                local remaining = math.round(towerWaitTime - (tick() - startWaitTime))
+                if remaining > 0 then
+                    setRestartObjective('Restarting Tower in ' .. remaining .. 's')
+                end
+                task.wait(0.5)
+            end
+            resetRestartObjective()
+            
             missionEndRestartOrNextEvent()
         end)
     end
@@ -4431,7 +4569,7 @@ function libNoti(msg, duration)
     })
 end
 
--- Hàm set mission objective
+-- Hàm set mission objective cho dungeon start
 function setMissionObjective(text, color)
     local success = pcall(function()
         local label = c.PlayerGui.MissionObjective.MissionObjective.Label
@@ -4444,9 +4582,25 @@ function setMissionObjective(text, color)
     end)
 end
 
+-- Hàm set restart objective (dùng RaidClear)
+function setRestartObjective(text, color)
+    local success = pcall(function()
+        local raidClear = game:GetService("Players").LocalPlayer.PlayerGui.MissionRewards.MissionRewards.RaidClear
+        raidClear.Text = text
+        if color then
+            raidClear.TextColor3 = color
+        end
+    end)
+end
+
 -- Hàm reset mission objective
 function resetMissionObjective()
     setMissionObjective('')
+end
+
+-- Hàm reset restart objective
+function resetRestartObjective()
+    setRestartObjective('')
 end
 
 -- Biến flag để tránh chạy timer nhiều lần
@@ -4511,10 +4665,7 @@ function executeStartTimer()
         end
         task.wait()
     end
-    
-
     startTimerExecuting = false
-    
     resetMissionObjective()
     if fp and Toggles.Autofarm.Value and not Toggles.Killaura.Value then
         Toggles.Killaura:SetValue(true)
@@ -5740,6 +5891,17 @@ local DungeonRestartTimerSlider = Tab2:Slider({
 })
 ConfigSystem.registerUIElement("dungeonRestartTimer", DungeonRestartTimerSlider)
 
+-- smartdungeonrejoinline
+local SmartDungeonRejoinToggle = Tab2:Toggle({
+    Title = "Smart Dungeon Rejoin (for Guild)",
+    Desc = "Use dungeon-specific restart times instead of slider",
+    Default = Toggles.smartDungeonRejoin and Toggles.smartDungeonRejoin.Value or false,
+    Callback = function(state)
+        Toggles.smartDungeonRejoin:SetValue(state)
+    end
+})
+ConfigSystem.registerUIElement("smartDungeonRejoin", SmartDungeonRejoinToggle)
+
 -- restarttowertimerline
 local TowerRestartTimerSlider = Tab2:Slider({
     Title = "Tower Restart Timer",
@@ -6347,6 +6509,74 @@ local SmartT5AutoSellToggle = Section2Tab1:Toggle({
     end
 })
 ConfigSystem.registerUIElement("smartPerkSell", SmartT5AutoSellToggle)
+
+-- Divider + Paragraph cho Keep Perk toggles
+Section2Tab1:Divider()
+Section2Tab1:Paragraph({
+    Title = "Keep Perk Toggles",
+    Desc = "Enable toggles below to check specific perks when auto selling"
+})
+
+-- ✅ THÊM: Toggle cho từng perk cần giữ
+local keepPerkToggles = {
+    {key = "Vampiric", name = "Keep Vampiric"},
+    {key = "LifeDrain", name = "Keep Life Drain"},
+    {key = "Oblivion", name = "Keep Oblivion"},
+    {key = "Agility", name = "Keep Agility"},
+    {key = "AttackUp", name = "Keep Attack Up"},
+    {key = "BonusHealthRegen", name = "Keep Bonus Health Regen"},
+    {key = "BossSlayer", name = "Keep Boss Slayer"},
+    {key = "BurnChance", name = "Keep Burn Chance"},
+    {key = "CriticalStack", name = "Keep Critical Stack"},
+    {key = "DamageReduction", name = "Keep Damage Reduction"},
+    {key = "ElementalResistance", name = "Keep Elemental Resistance"},
+    {key = "EliteAssassin", name = "Keep Elite Assassin"},
+    {key = "Energized", name = "Keep Energized"},
+    {key = "Ferocious", name = "Keep Ferocious"},
+    {key = "Fortress", name = "Keep Fortress"},
+    {key = "Glass", name = "Keep Glass"},
+    {key = "GoldHoarder", name = "Keep Gold Hoarder"},
+    {key = "HPUp", name = "Keep HP Up"},
+    {key = "LuckyLooter", name = "Keep Lucky Looter"},
+    {key = "MasterThief", name = "Keep Master Thief"},
+    {key = "MobSlayer", name = "Keep Mob Slayer"},
+    {key = "OpeningStrike", name = "Keep Opening Strike"},
+    {key = "PoisonousThorns", name = "Keep Poisonous Thorns"},
+    {key = "ResistBurn", name = "Keep Resist Burn"},
+    {key = "ResistFrost", name = "Keep Resist Frost"},
+    {key = "ResistKnockdown", name = "Keep Resist Knockdown"},
+    {key = "ResistPoison", name = "Keep Resist Poison"},
+    {key = "RoughSkin", name = "Keep Rough Skin"},
+    {key = "SelfDestruct", name = "Keep Self Destruct"},
+    {key = "ShiftedAggro", name = "Keep Shifted Aggro"},
+    {key = "Untouchable", name = "Keep Untouchable"},
+    {key = "BonusAttack", name = "Keep Bonus Attack"},
+    {key = "BonusHP", name = "Keep Bonus HP"},
+    {key = "BonusWalkspeed", name = "Keep Bonus Walkspeed"},
+    {key = "Elemental", name = "Keep Elemental"},
+}
+
+for _, perk in ipairs(keepPerkToggles) do
+    local toggleName = "keep" .. perk.key
+    local toggle = Section2Tab1:Toggle({
+        Title = perk.name,
+        Desc = "Enable to check " .. perk.key .. " perk when auto selling",
+        Icon = "check",
+        Type = "Checkbox",
+        Default = false,
+        Callback = function(state)
+            Toggles[toggleName]:SetValue(state)
+        end
+    })
+    ConfigSystem.registerUIElement(toggleName, toggle)
+end
+
+-- Divider + Paragraph trước threshold sliders
+Section2Tab1:Divider()
+Section2Tab1:Paragraph({
+    Title = "Perk Threshold Sliders",
+    Desc = "Set minimum % required to keep each perk (only affects enabled toggles above)"
+})
 
 -- ✅ SỬA: Wrap trong function
 do
