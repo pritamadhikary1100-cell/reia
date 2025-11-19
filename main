@@ -3059,25 +3059,25 @@ local cl = {
             Cooldown = 0.275
         }, {
             Skill = 'MageOfShadowsBlast',
-            Cooldown = 0.3
+            Cooldown = 0.37
         }, {
             Skill = 'MageOfShadowsCharged',
-            Cooldown = 0.31
+            Cooldown = 0.5
         }, {
             Skill = 'MageOfShadowsBlastCharged',
-            Cooldown = 0.31
+            Cooldown = 0.5
         }, {
             Skill = 'BighShadowOrb1',
-            Cooldown = 0.33
+            Cooldown = 0.5
         }, {
             Skill = 'BighShadowOrb2',
-            Cooldown = 0.33
+            Cooldown = 0.5
         }, {
             Skill = 'BighShadowOrb3',
-            Cooldown = 0.33
+            Cooldown = 0.5
         }, {
             Skill = 'MageOfShadowsDamageCircle',
-            Cooldown = 0.33
+            Cooldown = 0.5
         }, {
             Skill = bc:WaitForChild('MageOfShadows'):WaitForChild('ShadowChains'),
             Cooldown = 6,
